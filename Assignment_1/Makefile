@@ -2,8 +2,8 @@ CFLAGS=-Wall -Wextra  -Werror  -pedantic
 CC=clang $(CFLAGS)
 
 myweb	:	myweb.o
-	$(CC) -o myweb	myweb.o
-myweb.o    :         myweb.c
-	$(CC) -c myweb.c
+	$(CC) -o bin/myweb	bin/myweb.o
+myweb.o    :         src/myweb.c
+	$(CC) -c src/myweb.c -o bin/myweb.o
 clean	:
-	rm -f myweb	myweb.o
+	rm -f ./bin/*

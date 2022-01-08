@@ -1,3 +1,6 @@
 # Project exclude paths
 /Assignment_1/cmake-build-debug/
 *.o
+/Assignment_1/bin/*
+.clang-format
+CMakeLists.txt
