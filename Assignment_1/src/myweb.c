@@ -8,6 +8,13 @@
 #include <unistd.h>
 
 long find_content_length(char *buffer) {
+    char* chunk = "Transfer-Encoding: chunked";
+    char* chunk_result = strstr(buffer,chunk);
+
+    if (chunk_result!=NULL){
+        fprintf(stderr,"has chunk");
+        exit( -1);
+    }
     char *substring = "Content-Length: ";
     char *result = strstr(buffer, substring);
     if (result == NULL) {
@@ -59,29 +66,29 @@ int main(int argc, char *argv[]) {
     char splite[] = "/";
     char *ip_host = strtok(host_name, splite);
     char *path = strtok(NULL, ":");
-    fprintf(stderr,"url:%s\n", url);
-    fprintf(stderr,"ip+host:%s\n", ip_host);
-    fprintf(stderr,"path:%s\n", path);
+//    fprintf(stderr,"url:%s\n", url);
+//    fprintf(stderr,"ip+host:%s\n", ip_host);
+//    fprintf(stderr,"path:%s\n", path);
     char *ip_address = strtok(ip_host, ":");
-    fprintf(stderr,"ip address:%s", ip_address);
+//    fprintf(stderr,"ip address:%s", ip_address);
     long port_number = 80;
     char *port_str = strtok(NULL, ":");
     char *stop;
     if (port_str != NULL) {
         port_number = strtol(port_str, &stop, 10);
     }
-    printf("url:%s\n", url);
-    printf("ip+host:%s\n", ip_host);
-    printf("path:%s\n", path);
-    printf("ip address:%s\n", ip_address);
-    printf("port:%lu\n", port_number);
+//    printf("url:%s\n", url);
+//    printf("ip+host:%s\n", ip_host);
+//    printf("path:%s\n", path);
+//    printf("ip address:%s\n", ip_address);
+//    printf("port:%lu\n", port_number);
 
     char result;
     char buffer[1024];
     char httprequest[1024];
     sprintf(httprequest, "GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", path, url);
-    printf("%s\n", httprequest);
-    char *file_name = "./output.data";
+    fprintf(stderr,"%s\n", httprequest);
+    char *file_name = "./output.dat";
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
     if (sock == -1) {
@@ -93,10 +100,13 @@ int main(int argc, char *argv[]) {
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port_number);
     serv_addr.sin_addr.s_addr = inet_addr(ip_address);
-
+    if (serv_addr.sin_addr.s_addr==INADDR_NONE){
+        fprintf(stderr,"ip FORMAT Incorrect\n");
+        exit(1);
+    }
     int connection_result = connect(sock, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
     if (connection_result == -1) {
-        printf("Connection Error");
+        fprintf(stderr,"Connection Error");
         return -1;
     }
 
@@ -115,13 +125,16 @@ int main(int argc, char *argv[]) {
         }
         printf("%c", result);
     }
+    read(sock, &result, 1);
     if (body) {
         FILE *output = fopen(file_name, "w+");
         long size = find_content_length(buffer);
         //printf("%lu", size);
         get_content(sock, size, output);
         fclose(output);
-        close(sock);
-        return 0;
+
+
     }
+    close(sock);
+    return 0;
 }
