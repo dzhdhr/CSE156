@@ -15,6 +15,19 @@ long find_content_length(char *buffer) {
         fprintf(stderr,"has chunk");
         exit( -1);
     }
+    char *end;
+    char code[3] = {buffer[9],buffer[10],buffer[11]};
+    int status = strtol(code, &end, 10);
+    if (status!=200){
+        fprintf(stderr,"Error code %d\n",status);
+        for (int i = 0; ; ++i) {
+            fprintf(stderr,"%c",buffer[i]);
+            if (buffer[i]=='\n'){
+                break;
+            }
+        }
+        exit(-1);
+    }
     char *substring = "Content-Length: ";
     char *result = strstr(buffer, substring);
     if (result == NULL) {
@@ -66,6 +79,9 @@ int main(int argc, char *argv[]) {
     char splite[] = "/";
     char *ip_host = strtok(host_name, splite);
     char *path = strtok(NULL, ":");
+    if (path==NULL){
+        path="/";
+    }
 //    fprintf(stderr,"url:%s\n", url);
 //    fprintf(stderr,"ip+host:%s\n", ip_host);
 //    fprintf(stderr,"path:%s\n", path);
@@ -87,7 +103,7 @@ int main(int argc, char *argv[]) {
     char buffer[1024];
     char httprequest[1024];
     sprintf(httprequest, "GET /%s HTTP/1.1\r\nHost: %s\r\n\r\n", path, url);
-    fprintf(stderr,"%s\n", httprequest);
+    fprintf(stdout,"request %s\n", httprequest);
     char *file_name = "./output.dat";
 
     int sock = socket(AF_INET, SOCK_STREAM, 0);
